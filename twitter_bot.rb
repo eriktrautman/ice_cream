@@ -3,6 +3,8 @@
 require 'oauth'
 require 'launchy'
 require 'yaml'
+require 'rest-client'
+require 'addressable/uri'
 
 # Username: SpamBot26103678
 # Password: spambot
@@ -20,7 +22,7 @@ class TwitterBot
   end
 
   def run
-    #while true
+    while true
       puts "\nHI! Welcome to the TWITTERSPAMBOT26103678!"
       # ask for user input!  get 4 possible commands, run those methods.
       case user_input
@@ -30,13 +32,13 @@ class TwitterBot
         when "d" then send_direct_message
         when "q" then exit
       end
-    #end
+    end
   end
 
   def user_input
     input_command = ''
-    puts "Command format: "
-    puts "['p' = post tweet, 't' = get timeline,'s' = get user status, 'd' = send direct message, 'q' = quit]"
+    puts "\nCommand format: "
+    puts "['p' = post tweet, 't' = get timeline,'s' = get user status, 'd' = send direct message, 'q' = quit]\n\n"
     until VALID_COMMANDS.include?(input_command)
       print "Enter a valid command: "
       input_command = gets.chomp
@@ -44,24 +46,53 @@ class TwitterBot
     input_command
   end
 
-  def post_status
+  def post_status(dm_recipient=nil)
+    tweet_body = get_tweet_body(dm_recipient)
 
+    # if dm_recipient != nil
+    #   tweet_body
+
+    url = Addressable::URI.new(
+      :scheme => "https",
+      :host => "api.twitter.com",
+      :path => "1.1/statuses/update.json",
+      ).to_s
+    p "URL IS : #{url}"
+    params = {
+      :status => tweet_body
+    }
+
+    response = @access_token.post(url, params)
+    puts "TWEETED!!!"
+  end
+
+  def get_tweet_body(dm_recipient = nil)
+    dm_recipient.nil? ? tweet_body = "" : tweet_body = "D #{dm_recipient} "
+    p "Enter tweet text: #{tweet_body}"
+    tweet_body += gets.chomp
+    p tweet_body
+    tweet_body
   end
 
   def get_timeline
-    @access_token.get("http://api.twitter.com/1.1/statuses/user_timeline.json").body
+    p @access_token.get("http://api.twitter.com/1.1/statuses/user_timeline.json").body
   end
 
   def get_statuses
-
+    p @access_token.get("http://api.twitter.com/1.1/statuses/user_timeline.json").body
   end
 
   def send_direct_message
+    post_status(request_message_recipient)
+  end
 
-    # ask for the recipient
-
-    # send the message
-
+  def request_message_recipient
+    recipient = nil
+    while recipient.nil?
+      puts "Who is your recipient?"
+      recipient = gets.chomp
+    end
+    recipient
   end
 
   # ask the user to specify the recipient of the next function
