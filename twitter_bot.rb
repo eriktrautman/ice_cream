@@ -5,6 +5,7 @@ require 'launchy'
 require 'yaml'
 require 'rest-client'
 require 'addressable/uri'
+require 'json'
 
 # Username: SpamBot26103678
 # Password: spambot
@@ -75,11 +76,16 @@ class TwitterBot
   end
 
   def get_timeline
-    p @access_token.get("http://api.twitter.com/1.1/statuses/user_timeline.json").body
+    response = @access_token.get("http://api.twitter.com/1.1/statuses/user_timeline.json").body
+    json_response = JSON.parse(response)
+    json_response.each do |timeline_item|
+      puts "TEXT: #{timeline_item["text"]}"
+    end
   end
 
   def get_statuses
-    p @access_token.get("http://api.twitter.com/1.1/statuses/user_timeline.json").body
+    # What the heck is this? Meh.  Ignored.
+    get_timeline
   end
 
   def send_direct_message
